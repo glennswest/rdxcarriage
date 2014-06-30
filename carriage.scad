@@ -3,7 +3,7 @@
 // Modified and Changed by glennswest@neuralcloudcomputing.com
 
 
-use_middle_belt = 0;
+use_middle_belt = 1;
 use_side_belt = 0;
 
 
@@ -98,72 +98,6 @@ module main_part()
   translate([0, main_cube_width/2, 0]) {
     cylinder(r=main_cube_width/2, h=main_height+height_offset, $fn=150, center = true);
   }
-
-  // Belt clamps.
-
-  if (use_middle_belt < 1) {
-
-    translate([-2, -10, main_height/2]) {
-
-      translate([-3, 0, belt_width/2])
-        difference() {
-          union() {
-            cube([3, 15, belt_width+4], center=true);
-
-            extra_belt_support(3);
-
-          }
-
-
-          translate([0, 0, (belt_width+4)/2-3]) {
-            rotate([0, 90, 0]) {
-              cylinder(r=3.3/2, h=main_height+height_offset, $fn=150, center = true);
-            }
-          }
-
-          translate([-3/2, -100/2, 0]) {
-            // GT2 belt
-            for ( i = [0 : 2 : 100] )
-            {
-              translate([0, i, 0])
-                cube([3, 1.5, belt_width+4], center = true);
-            }
-          }
-
-          translate([-3/2, 0, belt_width/2]) {
-            cube([3, 6, 6], center = true);
-          }
-        }
-
-
-      translate([-8.5, 0, belt_width/2]) {
-        difference() {
-union() {
-          cube([4, 15, belt_width+4], center=true);
-
-          extra_belt_support(4);
-
-
-
-}
-
-          translate([0, 0, (belt_width+4)/2-3]) {
-            rotate([0, 90, 0]) {
-              cylinder(r=3.3/2, h=main_height+height_offset, $fn=150, center = true);
-            }
-          }
-        }
-      }
-
-
-
-
-
-
-    }
-  }
-
-
 }
 
 module cutter()
@@ -292,20 +226,6 @@ module main_carriage()
       }
 
 
-      if (use_side_belt > 0) {
-        translate([-main_cube_width/2+(main_cube_width/8), main_cube_length/8, height_offset/2]) {
-          translate([0, 3, 0]) {
-            rotate([0, 0, 0]) {
-              cylinder(r=1.5, h=20, $fn=100, center = true);
-            }
-          }
-          translate([0, -3, 0]) {
-            rotate([0, 0, 0]) {
-              cylinder(r=1.5, h=20, $fn=100, center = true);
-            }
-          }
-        }
-      }
 
       translate([-main_cube_width/2+(main_cube_width/8), main_cube_length/2, 0]) {
         cylinder(r=1.5, h=100, $fn=100, center = true);
@@ -357,47 +277,8 @@ module main_carriage()
 }
 
 
-module belt_holder()
-{
-  difference() {
-    union() {
-      cube([10, 12, 15], center = true);
-      translate([0, 0, -15/2]) {
-        difference() {
-          union() {
-            cube([10, 40, 3], center = true);
-            cube([18, 10, 3], center = true);
-            translate([-18/2, 0, 0]) {
-              cylinder(3, r=10/2, r=10/2, center=true, $fn=150);
-            }
-            translate([18/2, 0, 0]) {
-              cylinder(3, r=10/2, r=10/2, center=true, $fn=150);
-            }
-          }
-          translate([18/2, 0, 0]) {
-            cylinder(100, r=3/2, r=3/2, center=true, $fn=150);
-          }
-          translate([-18/2, 0, 0]) {
-            cylinder(100, r=3/2, r=3/2, center=true, $fn=150);
-          }
-        }
-      }
-    }
-    translate([0, 3, 3]) {
-      rotate([0, 90, 0]) {
-        cylinder(100, r=3/2, r=3/2, center=true, $fn=150);
-      }
-    }
-    translate([0, -3, 3]) {
-      rotate([0, 90, 0]) {
-        cylinder(100, r=3/2, r=3/2, center=true, $fn=150);
-      }
-    }
-  }
-}
 
 
 main_carriage();
 translate([-main_cube_width, 0, 9]) {
-  //belt_holder();
 }
