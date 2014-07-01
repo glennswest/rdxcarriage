@@ -1,4 +1,4 @@
-
+use <isothread.scad>;
 
 // Ball Mount
 BallSize = 7.0;
@@ -15,4 +15,5 @@ difference(){
     
     translate([0,0,Zball]) sphere(Tball,$fn=50);
     translate([0,0,Mzheight]) cylinder(r=Mdiameter, h=Mzheight,$fn = 50);
+    translate([0,0,0]) hex_bolt(2,Cheight);
     }
