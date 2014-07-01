@@ -3,7 +3,7 @@
 // Modified and Changed by glennswest@neuralcloudcomputing.com
 
 
-use_middle_belt = 1;
+use_middle_belt = -1;
 use_side_belt = 0;
 
 
@@ -269,10 +269,7 @@ module main_carriage()
       }
     }
 
-    rod_holder();
-    mirror([ 1, 0, 0 ]) {
-      rod_holder();
-    }
+   
   }
 }
 
