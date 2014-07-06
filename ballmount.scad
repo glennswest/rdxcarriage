@@ -1,19 +1,47 @@
 use <isothread.scad>;
 
+// Effector
+separation = 44;
 // Ball Mount
 BallSize = 7.0;
 BallFudge = .1;
 Mdiameter = 4.1;
 Mheight = 2;
+XHeight = 4; // Make it longer
 Tball = BallSize + BallFudge;
-Cheight = Tball*1.5+Mheight;
-Zball = Cheight; // - (Tball / 2);
+Cheight = Tball*1.75+Mheight+4;
+Zball = Cheight; 
 Mzheight = - (2*Mheight)+Tball;
 
+module ball_mount(){
 difference(){
-	cylinder(r=(Tball/2)+4, h=Cheight,$fn = 50);
+	cylinder(r=(Tball/2)+5, h=Cheight,$fn = 50);
     
     translate([0,0,Zball]) sphere(Tball,$fn=50);
-    translate([0,0,Mzheight]) cylinder(r=Mdiameter, h=Mzheight,$fn = 50);
+    translate([0,0,Mzheight+6]) cylinder(r=Mdiameter, h=Mzheight,$fn = 50);
     translate([0,0,0]) hex_bolt(2,Cheight);
     }
+}
+
+
+module blank_ball_mount(){
+    translate([0,0,-1 * Cheight]) cylinder(r=(Tball/2)+5, h=Cheight*3,$fn = 50);
+}
+
+module twin_ball_mount(){
+   union()
+      { 
+      translate([0,0 - (separation / 2), 0]) rotate([0,45,0]) ball_mount();
+      translate([0,0 + (separation / 2), 0]) rotate([0,45,0]) ball_mount();
+      }
+}
+
+module blank_twin_ball_mount(){
+   union()
+      { 
+      translate([0,0 - (separation / 2), 0]) rotate([0,45,0]) blank_ball_mount();
+      translate([0,0 + (separation / 2), 0]) rotate([0,45,0]) blank_ball_mount();
+      }
+}
+
+// ball_mount();

@@ -1,281 +1,177 @@
+// Cerberus Pup-style carriage for Kossel, compatible with Kossel Mini/Pro linear rails
 
-// Orignally By Chillance < chillance@gmail.com >
-// Modified and Changed by glennswest@neuralcloudcomputing.com
+// Steve Graber made the original design.
+// Daniel Akesson converted the original into OpenSCAD.
+// Brandon Heller tweaked the OpenSCAD to:
+// - be compatible with linear rails (thicker, w/20x20 m3 mounting grid)
+// - decouple rod mounts from the carriage, and be compatible with the Kosssel effector.
+// Treaked further to add ball mounts
 
+// Kossel Pro and Mini ball rails equivalent to HIWIN Model MGN 12H:
+// http://hiwin.com/html/extras/mgn-c_mgn-h.html
+// Distance from ball rail attachment plane to outer face of slider, marked H.
+ball_rail_H = 13;
 
-use_middle_belt = -1;
-use_side_belt = 0;
+// This is the key dimension to enable rail compatibility.
+// With the Graber double-623 V-wheels, an m3 nut plus a washer gives ~1mm of clearance.
+carriage_extrusion_dist = 1;
+main_height = ball_rail_H - carriage_extrusion_dist;
 
-
-
-main_cube_width = 39;
+// Roller holes
+// Presumably, this carriage will ride on an extrusion.
+// Measured width of OpenBeam, slightly less than actual 15mm.
+extrusion_width = 14.90;
+roller_dia = 15.57;  // Measured diameter of 3 different Grabercars double 623 w-wheels.
+roller_r = roller_dia / 2;
+// Using calipers, measure from the edge of the extrusion to side of the wheel.
+// This dimension must be slightly less than the sum of the extrusion width + roller dia. 
+wheel_extrusion_len = 29.60;
+// extra_squeeze helps to ensure that the rollers makes contact with the beam
+// before tightening the tensioning screw, even if any measurements are off,
+// screw holes for the rollers are drilled at a skewed angle, or screw holes are
+// slightly enlarged and enable the screws to splay out a bit under tension.
+// The ~2mm of screw adjustment from the slot is not a lot, and it's better
+// to have the beam w/the single roller stretch out than to not get enough
+// tension.
+extra_squeeze = 0.3;
+roller_x_offset = wheel_extrusion_len - roller_r - (extrusion_width / 2) - extra_squeeze;
+beam_width = 10.5;
+main_cube_width = (roller_x_offset + beam_width / 2) * 2;
 main_cube_length = 40;
-main_height = 8;
-height_offset = 0;
-rod_fastener_height = 10 + main_height;
-rod_fastener_width = 14;
-rod_fastener_length = 8;
+roller_y_offset = (main_cube_length/3)/2;
+roller_y_offset_each = main_cube_length*(0.93)/2;
 
-round_r = 3;
 pad = 0.1;
 smooth = 50;
+main_curve_smooth = 150;
 
-rod_offset = 3;
+// Cut params
+cut_width = 2.0;  // Width of cut
+minimal_cut = (main_cube_width/4)*0.53;  // Larger values move the main cut (in the y dir) outwards.
+rest_cut = (main_cube_width/4)*0.85; // Distance to make the cut that exits the outside of the carriage.
+cut_offset_x = main_cube_width/4+minimal_cut/2;
 
+m3_nut_slop = 0.25;  // Account for inability for layer height to exactly match nut width.
+m3_nut_dia = 6.18 + m3_nut_slop;
+m3_nut_r = m3_nut_dia / 2;
+m3_nut_thickness = 2.35;
+// Extra thickness to help match discrete screw sizes
+m3_nut_thickness_extra = m3_nut_thickness + 2.3;
+// A bit less extra thickness for tensioner to avoid causing a cutout in the nut trap for the 20x20 grid.
+m3_nut_thickness_extra_tensioner = m3_nut_thickness + 1;
 
+m3_screw_slop = 0.1;
+m3_screw_dia = 3.0 + m3_screw_slop;
+m3_screw_r = m3_screw_dia / 2;
+m3_screw_head_slop = 0.22;
+m3_screw_head_r = 5.5/2 + m3_screw_head_slop;
+m3_screw_head_len = 3.0;  // SHCS
+m3_screw_head_gap = 0.5;
 
-belt_width = 18; // 7
-belt_x = 5.6;
-belt_z = 7;
+bridge_thickness = 0.6;  // To avoid ugly overhangs, use bridges.
 
-
-cutter_bag = 2;
-minimal_cut = (main_cube_width/4)*0.3;
-rest_cut = (main_cube_width/4)*0.7;
-
-extra_belt_support_length = 25;
-extra_belt_support_height = 17;
-
+delta = 0.02;  // Small value to avoid visual artifacts for coincident surfaces.
 
 module oval(w,h, height, center = false) {
-  scale([1, h/w, 1]) cylinder(h=height, r=w, $fn=150, center=center);
-}
-
-module extra_belt_support(width)
-{
-
-
-
-            translate([0, 0, belt_width/8]) {
-              difference() {
-                cube([width, extra_belt_support_length, extra_belt_support_height], center = true);
-
-                translate([-5, -extra_belt_support_length/2, -extra_belt_support_height/4]) {
-                  rotate([90, 0, 0]) {
-                    oval(5, 5, 10, $fn=100, center = true);
-                  }
-                }
-
-                translate([-5, extra_belt_support_length/2, -extra_belt_support_height/4]) {
-                  rotate([90, 0, 0]) {
-                    oval(5, 5, 10, $fn=100, center = true);
-                  }
-                }
-
-
-                translate([0, -extra_belt_support_length/2, extra_belt_support_height/2]) {
-                  rotate([0, 90, 0]) {
-                    cylinder(r=6/2, h=main_height+height_offset, $fn=150, center = true);
-                  }
-                }
-
-                translate([0, extra_belt_support_length/2, extra_belt_support_height/2]) {
-                  rotate([0, 90, 0]) {
-                    cylinder(r=6/2, h=main_height+height_offset, $fn=150, center = true);
-                  }
-                }
-
-                translate([0, extra_belt_support_length/2, -extra_belt_support_height/2]) {
-                  rotate([0, 90, 0]) {
-                    oval(extra_belt_support_height/3, 5, 10, $fn=100, center = true);
-                  }
-                }
-
-                translate([0, -extra_belt_support_length/2, -extra_belt_support_height/2]) {
-                  rotate([0, 90, 0]) {
-                    oval(extra_belt_support_height / 3, 5, 10, $fn=100, center = true);
-                  }
-                }
-              }
-            }
-
-
+  scale([1, h/w, 1]) cylinder(h=height, r=w, $fn=main_curve_smooth, center=center);
 }
 
 module main_part()
 {
-  cube([main_cube_width, main_cube_width, main_height+height_offset], center = true);
+  cube([main_cube_width, main_cube_width, main_height], center = true);
   translate([0, main_cube_width/2, 0]) {
-    cylinder(r=main_cube_width/2, h=main_height+height_offset, $fn=150, center = true);
+    cylinder(r=main_cube_width/2, h=main_height, $fn=main_curve_smooth, center = true);
   }
 }
 
-module cutter()
+module cut()
 {
-  translate([main_cube_width/4+minimal_cut/2, cutter_bag/2, 0]) {
-    cube([minimal_cut+cutter_bag, cutter_bag, main_height + height_offset + 2], center = true);
+  // Cut from center of part out, along x
+  translate([cut_offset_x, cut_width/2, 0]) {
+    cube([minimal_cut+cut_width, cut_width, main_height + 2], center = true);
   }
-  translate([main_cube_width/4+minimal_cut, -main_cube_length/8, height_offset/2]) {
-    cube([cutter_bag, main_cube_length/4+cutter_bag, main_height + (height_offset*2) + 2], center = true);
-    rotate([0, 90, 0]) {
-      cylinder(r=1.5, h=100, $fn=100, center = true);
+  // Cut along y and corresponding screw hole through body
+  translate([cut_offset_x+minimal_cut/2, -main_cube_length/8, 0]) {
+    cube([cut_width, main_cube_length/4+cut_width, main_height + 2], center = true);
+    translate([0, 1, 0]) rotate([0, 90, 0]) {
+      cylinder(r=m3_screw_r, h=100, $fn=smooth, center = true);
     }
   }
+  // Nut trap for tensioning screw
+  translate([0, 1, 0]) translate([-main_cube_width/2-delta+m3_nut_thickness/2+m3_nut_thickness_extra_tensioner/2, -main_cube_length/8, 0]) {
+    rotate([30, 0, 0]) rotate([0, 90, 0]) {
+      cylinder(r=m3_nut_r, h=m3_nut_thickness+delta+m3_nut_thickness_extra_tensioner, $fn=6, center=true);
+    }
+  }
+  // Cut to outer edge of part, along x
   translate([main_cube_width/4+rest_cut, -main_cube_length/4, 0]) {
-    cube([rest_cut, cutter_bag, main_height + height_offset + 2], center = true);
-  }
-}
-
-module rod_rounding()
-{
-  translate([0, -rod_fastener_length/2+round_r, rod_fastener_height/2-round_r+(height_offset/2)]) {
-    difference() {
-      translate([0,-round_r+pad,round_r+pad])
-        cube([rod_fastener_width+2*pad, round_r*2+pad, round_r*2+pad], center = true);
-      rotate(a=[0,90,0]) {
-        cylinder(rod_fastener_width+4*pad,round_r,round_r,center=true,$fn=smooth);
-      }
-    }
-  }
-}
-
-module rod_holder()
-{
-  translate([(main_cube_width/2) - (rod_fastener_width/2) + rod_offset, -main_cube_length/2, rod_fastener_height/2 - main_height/2]) {
-    difference() {
-      union() {
-        cube([rod_fastener_width, rod_fastener_length, rod_fastener_height+height_offset], center = true);
-        translate([rod_fastener_width/2-rod_offset, rod_fastener_length/2-rod_offset/2, -rod_fastener_height/2+main_height/2]) {
-          cylinder(main_height + height_offset, rod_offset, rod_offset, center=true, $fn=smooth);
-        }
-      }
-
-      translate([0, -rod_fastener_length/2, -rod_fastener_height/2]) {
-        rotate([23, 0, 0]) {
-          cube([rod_fastener_width+0.2, 7.5, 100], center = true);
-        }
-      }
-
-      translate([rod_fastener_width/2, 0, rod_fastener_height/2]) {
-
-        translate([0, 0, -(rod_fastener_height-main_height)/2]) {
-          difference() {
-            translate([0, 0, 4]) {
-              rotate([0, 0, 0]) {
-                cube([rod_fastener_width-0.2, rod_fastener_length*2 + 0.2, rod_fastener_height/2 + 0.2], center = true);
-              }
-
-              rotate([25, 0, 0]) {
-                cube([rod_fastener_width-0.2, rod_fastener_length*2 + 0.2, rod_fastener_height/2 + 0.2], center = true);
-              }
-
-              rotate([-25, 0, 0]) {
-                cube([rod_fastener_width-0.2, rod_fastener_length*2 + 0.2, rod_fastener_height/2 + 0.2], center = true);
-              }
-            }
-
-
-            rotate([0, -90, 0]) {
-              cylinder(h = rod_fastener_width/1, r1 = 2.5, r2 = 8, center = false, $fn=100);
-            }
-          }
-        }
-      }
-
-
-      translate([0, 0, (rod_fastener_height/3-2)+(height_offset)]) {
-        rotate([0, 90, 0]) {
-          cylinder(r=1.5, h=100, $fn=100, center = true);
-        }
-      }
-      rod_rounding();
-      mirror([ 0, 1, 0 ]) {
-        rod_rounding();
-      }
-    }
+    cube([rest_cut, cut_width, main_height + 2], center = true);
   }
 }
 
 module main_carriage()
 {
-  translate([0, 0 , (main_height + height_offset)/2]) {
+  translate([0, 0, (main_height)/2]) {
     difference() {
       main_part();
-      translate([0, 0, (-main_height/2)]) {
-        //cube([17, 100, height_offset+0.2], center = true);
+
+      // Square + oval cutout in center, minus section to give 3rd screw hole some beef.
+      difference() {
+        union() {
+          // Square cutout
+          translate([0, main_cube_length/4, 0]) {
+            cube([main_cube_width/2, main_cube_length/2, main_height + 2], center = true);
+          }
+          // Oval cutout at rounded end
+          translate([0, main_cube_length/2, 0]) {
+            oval(main_cube_width/4, main_cube_length/3, main_height + 2, $fn=smooth, center = true);
+          }  
+        }
+        // Section to give 3rd hole some beef
+        translate([-main_cube_width/4-delta, -delta, -main_height/2])
+          cube([4+delta, 17+delta, main_height]);
       }
-      if (height_offset > 0 ) {
-        translate([0, 0, (-main_height/2)-height_offset-2]) {
-          rotate([90, 0, 0]) {
-            //cylinder(r=main_cube_width/4, h=100, $fn=150, center = true);
-            //oval(main_cube_width/4, main_cube_width/6, 100, true);
-            oval(17.8/2, main_cube_width/4.0, 100, true);
+
+      // Holes for rollers
+      translate([0, roller_y_offset, 0]) {
+        // On side w/2 rollers:
+        for (i=[-1, 1]) {
+          translate([-roller_x_offset, roller_y_offset_each * i, 0]) {
+            cylinder(r=m3_screw_r, h=100, $fn=smooth, center = true);
+            translate([0, 0, main_height/2-m3_screw_head_len-m3_screw_head_gap])
+              cylinder(r=m3_screw_head_r, h=100, $fn=smooth);
           }
         }
-      }
-      translate([0, main_cube_length/4, 0]) {
-        cube([main_cube_width/2, main_cube_length/2, main_height + height_offset + 2], center = true);
-      }
-      translate([0, main_cube_length/2, 0]) {
-        cylinder(r=main_cube_width/4, h=main_height + height_offset + 2, $fn=100, center = true);
-        oval(main_cube_width/4, main_cube_length/3, main_height + height_offset + 2, $fn=100, center = true);
-      }
-      translate([-main_cube_width/2+(main_cube_width/8), -main_cube_length/4, 0]) {
-        cylinder(r=1.5, h=100, $fn=100, center = true);
-        translate([0, 0, (main_height/2) + (60/2) + 0.01]) {
-          //cylinder(r=6/2, h=60, $fn=100, center = true);
-        }
-        if (height_offset > 0 ) {
-          translate([0, 0, -main_height/2-height_offset+bearing_inset]) {
-            difference() {
-              cylinder(r=12/2, h=bearing_inset+0.2, $fn=150, center = true);
-              cylinder(r=5/2, h=bearing_inset+0.2, $fn=150, center = true);
-            }
-          }
+        // On side w/1 roller
+        translate([roller_x_offset, 0, 0]) {
+          cylinder(r=m3_screw_r, h=100, $fn=smooth, center = true);
+          translate([0, 0, main_height/2-m3_screw_head_len-m3_screw_head_gap])
+            cylinder(r=m3_screw_head_r, h=100, $fn=smooth);
         }
       }
 
+      // Cut, plus corresponding screw and nut trap.
+      cut();
 
+      // Trim top
+      translate([0, -100/2-17, 0]) cube([100, 100, 100], center=true);
 
-      translate([-main_cube_width/2+(main_cube_width/8), main_cube_length/2, 0]) {
-        cylinder(r=1.5, h=100, $fn=100, center = true);
-        if (height_offset > 0 ) {
-          translate([0, 0, -main_height/2-height_offset+bearing_inset]) {
-            difference() {
-              cylinder(r=12/2, h=bearing_inset+0.2, $fn=150, center = true);
-              cylinder(r=5/2, h=bearing_inset+0.2, $fn=150, center = true);
-            }
-          }
-        }
-      }
-      translate([main_cube_width/2-(main_cube_width/8), (main_cube_length/3)/2, 0]) {
-        cylinder(r=1.5, h=100, $fn=100, center = true);
-        if (height_offset > 0 ) {
-          translate([0, 0, -main_height/2-height_offset+bearing_inset]) {
-            difference() {
-              cylinder(r=12/2, h=bearing_inset+0.2, $fn=150, center = true);
-              cylinder(r=5/2, h=bearing_inset+0.2, $fn=150, center = true);
-            }
-          }
+      // 20x20 m3 grid to match HIWIN rails.
+      translate([0, 2.5, 0]) {
+        translate([10, -10, -main_height/2+m3_nut_thickness_extra+bridge_thickness])
+          cylinder(r=m3_screw_r, h=100, $fn=50);
+        translate([10, -10, -main_height/2-delta])
+          cylinder(r=m3_nut_r, h=m3_nut_thickness_extra+delta, $fn=6);
+        for (i=[-1, 1]) {
+          translate([-10, i*10, -main_height/2+m3_nut_thickness_extra+bridge_thickness])
+            cylinder(r=m3_screw_r, h=100, $fn=50);
+          translate([-10, i*10, -main_height/2-delta])
+            cylinder(r=m3_nut_r, h=m3_nut_thickness_extra+delta, $fn=6);
         }
       }
 
-
-      cutter();
-
-      if (use_middle_belt > 0) {
-
-        // Cut for belt.
-        translate([0, 0, (main_height+height_offset)/2]) {
-          cube([13, 100, 1], center = true);
-        }
-
-        translate([9, -main_cube_length/4, 0]) {
-          cylinder(r=1.5, h=main_height+height_offset+0.2, $fn=100, center = true);
-        }
-        translate([-9, -main_cube_length/4, 0]) {
-          cylinder(r=1.5, h=main_height+height_offset+0.2, $fn=100, center = true);
-        }
-      }
     }
-
-   
   }
 }
 
-
-
-
 main_carriage();
-translate([-main_cube_width, 0, 9]) {
-}
