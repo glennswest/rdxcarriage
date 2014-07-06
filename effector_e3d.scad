@@ -27,7 +27,7 @@ module effector() {
                 }
               }
           for( b = [20 : 20 : 360]) rotate([0,0,b]) {
-              rotate([0,0,b]) translate([offset+2, 0, 0])
+              rotate([0,0,b]) translate([offset+8, 0, 0])
               hex_bolt(2,height);
               } 
           }
