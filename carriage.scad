@@ -1,3 +1,4 @@
+use <ballmount.scad>;
 // Cerberus Pup-style carriage for Kossel, compatible with Kossel Mini/Pro linear rails
 
 // Steve Graber made the original design.
@@ -5,7 +6,6 @@
 // Brandon Heller tweaked the OpenSCAD to:
 // - be compatible with linear rails (thicker, w/20x20 m3 mounting grid)
 // - decouple rod mounts from the carriage, and be compatible with the Kosssel effector.
-// Treaked further to add ball mounts
 
 // Kossel Pro and Mini ball rails equivalent to HIWIN Model MGN 12H:
 // http://hiwin.com/html/extras/mgn-c_mgn-h.html
@@ -82,6 +82,7 @@ module main_part()
   translate([0, main_cube_width/2, 0]) {
     cylinder(r=main_cube_width/2, h=main_height, $fn=main_curve_smooth, center = true);
   }
+  
 }
 
 module cut()
@@ -157,21 +158,24 @@ module main_carriage()
       translate([0, -100/2-17, 0]) cube([100, 100, 100], center=true);
 
       // 20x20 m3 grid to match HIWIN rails.
-      translate([0, 2.5, 0]) {
-        translate([10, -10, -main_height/2+m3_nut_thickness_extra+bridge_thickness])
-          cylinder(r=m3_screw_r, h=100, $fn=50);
-        translate([10, -10, -main_height/2-delta])
-          cylinder(r=m3_nut_r, h=m3_nut_thickness_extra+delta, $fn=6);
-        for (i=[-1, 1]) {
-          translate([-10, i*10, -main_height/2+m3_nut_thickness_extra+bridge_thickness])
-            cylinder(r=m3_screw_r, h=100, $fn=50);
-          translate([-10, i*10, -main_height/2-delta])
-            cylinder(r=m3_nut_r, h=m3_nut_thickness_extra+delta, $fn=6);
-        }
-      }
+      //translate([0, 2.5, 0]) {
+      //translate([10, -10, -main_height/2+m3_nut_thickness_extra+bridge_thickness])
+      //    cylinder(r=m3_screw_r, h=100, $fn=50);
+      //  translate([10, -10, -main_height/2-delta])
+      //    cylinder(r=m3_nut_r, h=m3_nut_thickness_extra+delta, $fn=6);
+      //  for (i=[-1, 1]) {
+      //    translate([-10, i*10, -main_height/2+m3_nut_thickness_extra+bridge_thickness])
+      //      cylinder(r=m3_screw_r, h=100, $fn=50);
+      //    translate([-10, i*10, -main_height/2-delta])
+      //      cylinder(r=m3_nut_r, h=m3_nut_thickness_extra+delta, $fn=6);
+      //  }
+      //}
 
     }
   }
+  rotate([0,0,270]) translate([18,0,6]) twin_ball_mount();
+  translate([0,-18,6]) 
+      cube([38,5, main_height], center = true);
 }
 
 main_carriage();
