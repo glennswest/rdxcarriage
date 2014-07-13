@@ -1,4 +1,6 @@
 use <ballmount.scad>;
+
+
 // Cerberus Pup-style carriage for Kossel, compatible with Kossel Mini/Pro linear rails
 
 // Steve Graber made the original design.
@@ -10,22 +12,25 @@ use <ballmount.scad>;
 // Kossel Pro and Mini ball rails equivalent to HIWIN Model MGN 12H:
 // http://hiwin.com/html/extras/mgn-c_mgn-h.html
 // Distance from ball rail attachment plane to outer face of slider, marked H.
-ball_rail_H = 13;
+ball_rail_H = 13; 
 
 // This is the key dimension to enable rail compatibility.
 // With the Graber double-623 V-wheels, an m3 nut plus a washer gives ~1mm of clearance.
 carriage_extrusion_dist = 1;
 main_height = ball_rail_H - carriage_extrusion_dist;
 
+
+
 // Roller holes
 // Presumably, this carriage will ride on an extrusion.
-// Measured width of OpenBeam, slightly less than actual 15mm.
-extrusion_width = 14.90;
-roller_dia = 15.57;  // Measured diameter of 3 different Grabercars double 623 w-wheels.
+// Measured width of vslot, slightly less than actual 15mm.
+extrusion_width = 20.0;
+extrusion_cutout = (extrusion_width+3)/2;
+roller_dia = 23.92;  // Measured diameter of 3 different vwheels.
 roller_r = roller_dia / 2;
 // Using calipers, measure from the edge of the extrusion to side of the wheel.
 // This dimension must be slightly less than the sum of the extrusion width + roller dia. 
-wheel_extrusion_len = 29.60;
+wheel_extrusion_len = 43;
 // extra_squeeze helps to ensure that the rollers makes contact with the beam
 // before tightening the tensioning screw, even if any measurements are off,
 // screw holes for the rollers are drilled at a skewed angle, or screw holes are
@@ -33,7 +38,7 @@ wheel_extrusion_len = 29.60;
 // The ~2mm of screw adjustment from the slot is not a lot, and it's better
 // to have the beam w/the single roller stretch out than to not get enough
 // tension.
-extra_squeeze = 0.3;
+extra_squeeze = 3.0;
 roller_x_offset = wheel_extrusion_len - roller_r - (extrusion_width / 2) - extra_squeeze;
 beam_width = 10.5;
 main_cube_width = (roller_x_offset + beam_width / 2) * 2;
@@ -68,6 +73,26 @@ m3_screw_head_r = 5.5/2 + m3_screw_head_slop;
 m3_screw_head_len = 3.0;  // SHCS
 m3_screw_head_gap = 0.5;
 
+
+//x
+m4_nut_slop = 0.25;  // Account for inability for layer height to exactly match nut width.
+m4_nut_dia = 8.80 + m3_nut_slop;
+m4_nut_r = m4_nut_dia / 2;
+m4_nut_thickness = 5.00;
+// Extra thickness to help match discrete screw sizes
+m4_nut_thickness_extra = m4_nut_thickness + 2.3;
+// A bit less extra thickness for tensioner to avoid causing a cutout in the nut trap for the 20x20 grid.
+m4_nut_thickness_extra_tensioner = m4_nut_thickness + 1;
+
+m4_screw_slop = 0.18;
+m4_screw_dia = 4.0 + m4_screw_slop;
+m4_screw_r = m4_screw_dia / 2;
+m4_screw_head_slop = 0.22;
+m4_screw_head_r = 9.0/2 + m4_screw_head_slop;
+m4_screw_head_len = 4.0;  // SHCS
+m4_screw_head_gap = 0.5;
+
+
 bridge_thickness = 0.6;  // To avoid ugly overhangs, use bridges.
 
 delta = 0.02;  // Small value to avoid visual artifacts for coincident surfaces.
@@ -82,7 +107,6 @@ module main_part()
   translate([0, main_cube_width/2, 0]) {
     cylinder(r=main_cube_width/2, h=main_height, $fn=main_curve_smooth, center = true);
   }
-  
 }
 
 module cut()
@@ -112,6 +136,17 @@ module cut()
 
 module main_carriage()
 {
+	difference(){
+       carriage_body();
+       // Cut extrusion out back for low ride
+      translate([0, 5, -4])
+         cube([extrusion_width+3,100,extrusion_cutout],center=true);
+	  }
+
+}
+
+module carriage_body()
+{
   translate([0, 0, (main_height)/2]) {
     difference() {
       main_part();
@@ -119,6 +154,7 @@ module main_carriage()
       // Square + oval cutout in center, minus section to give 3rd screw hole some beef.
       difference() {
         union() {
+         
           // Square cutout
           translate([0, main_cube_length/4, 0]) {
             cube([main_cube_width/2, main_cube_length/2, main_height + 2], center = true);
@@ -138,44 +174,47 @@ module main_carriage()
         // On side w/2 rollers:
         for (i=[-1, 1]) {
           translate([-roller_x_offset, roller_y_offset_each * i, 0]) {
-            cylinder(r=m3_screw_r, h=100, $fn=smooth, center = true);
-            translate([0, 0, main_height/2-m3_screw_head_len-m3_screw_head_gap])
-              cylinder(r=m3_screw_head_r, h=100, $fn=smooth);
+            cylinder(r=m4_screw_r, h=100, $fn=smooth, center = true);
+            translate([0, 0, main_height/2-m4_screw_head_len-m4_screw_head_gap])
+            cylinder(r=m4_screw_head_r, h=100, $fn=smooth);
           }
         }
         // On side w/1 roller
         translate([roller_x_offset, 0, 0]) {
+          cylinder(r=m4_screw_r, h=100, $fn=smooth, center = true);
+          translate([0, 0, main_height/2-m4_screw_head_len-m4_screw_head_gap])
+            cylinder(r=m4_screw_head_r, h=100, $fn=smooth);
+        }
+
+        // Belt Top
+        translate([roller_x_offset-10, roller_y_offset+24, 0]) {
+          translate([0, 0, main_height-30])
+               cylinder(r=m3_screw_head_r, h=16, $fn=smooth);
           cylinder(r=m3_screw_r, h=100, $fn=smooth, center = true);
           translate([0, 0, main_height/2-m3_screw_head_len-m3_screw_head_gap])
-            cylinder(r=m3_screw_head_r, h=100, $fn=smooth);
-        }
+             cylinder(r=m3_screw_head_r, h=100, $fn=smooth);
+           
+              
+          }
       }
 
       // Cut, plus corresponding screw and nut trap.
       cut();
-
+      
       // Trim top
       translate([0, -100/2-17, 0]) cube([100, 100, 100], center=true);
-
-      // 20x20 m3 grid to match HIWIN rails.
-      //translate([0, 2.5, 0]) {
-      //translate([10, -10, -main_height/2+m3_nut_thickness_extra+bridge_thickness])
-      //    cylinder(r=m3_screw_r, h=100, $fn=50);
-      //  translate([10, -10, -main_height/2-delta])
-      //    cylinder(r=m3_nut_r, h=m3_nut_thickness_extra+delta, $fn=6);
-      //  for (i=[-1, 1]) {
-      //    translate([-10, i*10, -main_height/2+m3_nut_thickness_extra+bridge_thickness])
-      //      cylinder(r=m3_screw_r, h=100, $fn=50);
-      //    translate([-10, i*10, -main_height/2-delta])
-      //      cylinder(r=m3_nut_r, h=m3_nut_thickness_extra+delta, $fn=6);
-      //  }
-      //}
-
     }
   }
-  rotate([0,0,270]) translate([18,0,6]) twin_ball_mount();
-  translate([0,-18,6]) 
-      cube([38,5, main_height], center = true);
+  
+      difference() {
+        translate([0,-26,6])  
+            cube([main_cube_width,20, main_height], center = true);
+        rotate([0,0,270]) translate([22,0,6]) blank_twin_ball_mount();
+        translate([0,-34,6]) 
+           cylinder(r=14,h=main_height, $fn=smooth, center = true);
+        }
+  rotate([0,0,270]) translate([22,0,6]) twin_ball_mount();
+  
 }
 
 main_carriage();
