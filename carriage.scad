@@ -1,5 +1,5 @@
 use <ballmount.scad>;
-
+use <traxmount.scad>;
 
 // Cerberus Pup-style carriage for Kossel, compatible with Kossel Mini/Pro linear rails
 
@@ -38,7 +38,7 @@ wheel_extrusion_len = 43;
 // The ~2mm of screw adjustment from the slot is not a lot, and it's better
 // to have the beam w/the single roller stretch out than to not get enough
 // tension.
-extra_squeeze = 3.0;
+extra_squeeze = 2.0;
 roller_x_offset = wheel_extrusion_len - roller_r - (extrusion_width / 2) - extra_squeeze;
 beam_width = 10.5;
 main_cube_width = (roller_x_offset + beam_width / 2) * 2;
@@ -95,11 +95,15 @@ m4_screw_head_gap = 0.5;
 
 bridge_thickness = 0.6;  // To avoid ugly overhangs, use bridges.
 
+do_ball_mount = 0;
+
 delta = 0.02;  // Small value to avoid visual artifacts for coincident surfaces.
+
 
 module oval(w,h, height, center = false) {
   scale([1, h/w, 1]) cylinder(h=height, r=w, $fn=main_curve_smooth, center=center);
 }
+
 
 module main_part()
 {
@@ -136,12 +140,13 @@ module cut()
 
 module main_carriage()
 {
-	difference(){
-       carriage_body();
-       // Cut extrusion out back for low ride
-      translate([0, 5, -4])
-         cube([extrusion_width+3,100,extrusion_cutout],center=true);
-	  }
+	carriage_body();
+//	difference(){
+//      carriage_body();
+//       // Cut extrusion out back for low ride
+//      translate([0, 5, -4])
+//         cube([extrusion_width+3,100,extrusion_cutout],center=true);
+//	  }
 
 }
 
@@ -206,15 +211,20 @@ module carriage_body()
     }
   }
   
-      difference() {
+  if (do_ball_mount == 1){   
+   difference() {
         translate([0,-26,6])  
             cube([main_cube_width,20, main_height], center = true);
         rotate([0,0,270]) translate([22,0,6]) blank_twin_ball_mount();
         translate([0,-34,6]) 
            cylinder(r=14,h=main_height, $fn=smooth, center = true);
         }
-  rotate([0,0,270]) translate([22,0,6]) twin_ball_mount();
-  
+   rotate([0,0,270]) translate([22,0,6]) twin_ball_mount();
+  } else {
+   translate([0,-26,6])  
+            cube([27,20, main_height], center = true);
+   rotate([0,0,0]) translate([0,-41,10]) trax_mount();
+  }
 }
 
 main_carriage();
