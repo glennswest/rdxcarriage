@@ -65,7 +65,7 @@ m3_nut_thickness_extra = m3_nut_thickness + 2.3;
 // A bit less extra thickness for tensioner to avoid causing a cutout in the nut trap for the 20x20 grid.
 m3_nut_thickness_extra_tensioner = m3_nut_thickness + 1;
 
-m3_screw_slop = 0.1;
+m3_screw_slop = 0.2;
 m3_screw_dia = 3.0 + m3_screw_slop;
 m3_screw_r = m3_screw_dia / 2;
 m3_screw_head_slop = 0.22;
@@ -75,22 +75,22 @@ m3_screw_head_gap = 0.5;
 
 
 //x
-m4_nut_slop = 0.25;  // Account for inability for layer height to exactly match nut width.
-m4_nut_dia = 8.80 + m3_nut_slop;
-m4_nut_r = m4_nut_dia / 2;
-m4_nut_thickness = 5.00;
+m5_nut_slop = 0.25;  // Account for inability for layer height to exactly match nut width.
+m5_nut_dia = 8.80 + m5_nut_slop;
+m5_nut_r = m5_nut_dia / 2;
+m5_nut_thickness = 5.00;
 // Extra thickness to help match discrete screw sizes
-m4_nut_thickness_extra = m4_nut_thickness + 2.3;
+m5_nut_thickness_extra = m5_nut_thickness + 2.3;
 // A bit less extra thickness for tensioner to avoid causing a cutout in the nut trap for the 20x20 grid.
-m4_nut_thickness_extra_tensioner = m4_nut_thickness + 1;
+m5_nut_thickness_extra_tensioner = m5_nut_thickness + 1;
 
-m4_screw_slop = 0.18;
-m4_screw_dia = 4.0 + m4_screw_slop;
-m4_screw_r = m4_screw_dia / 2;
-m4_screw_head_slop = 0.22;
-m4_screw_head_r = 9.0/2 + m4_screw_head_slop;
-m4_screw_head_len = 4.0;  // SHCS
-m4_screw_head_gap = 0.5;
+m5_screw_slop = 0.18;
+m5_screw_dia = 5.0 + m5_screw_slop;
+m5_screw_r = m5_screw_dia / 2;
+m5_screw_head_slop = 0.22;
+m5_screw_head_r = 9.5/2 + m5_screw_head_slop;
+m5_screw_head_len = 4.0;  // SHCS
+m5_screw_head_gap = 0.5;
 
 
 bridge_thickness = 0.6;  // To avoid ugly overhangs, use bridges.
@@ -179,16 +179,16 @@ module carriage_body()
         // On side w/2 rollers:
         for (i=[-1, 1]) {
           translate([-roller_x_offset, roller_y_offset_each * i, 0]) {
-            cylinder(r=m4_screw_r, h=100, $fn=smooth, center = true);
-            translate([0, 0, main_height/2-m4_screw_head_len-m4_screw_head_gap])
-            cylinder(r=m4_screw_head_r, h=100, $fn=smooth);
+            cylinder(r=m5_screw_r, h=100, $fn=smooth, center = true);
+            translate([0, 0, main_height/2-m5_screw_head_len-m5_screw_head_gap])
+            cylinder(r=m5_screw_head_r, h=100, $fn=smooth);
           }
         }
         // On side w/1 roller
         translate([roller_x_offset, 0, 0]) {
-          cylinder(r=m4_screw_r, h=100, $fn=smooth, center = true);
-          translate([0, 0, main_height/2-m4_screw_head_len-m4_screw_head_gap])
-            cylinder(r=m4_screw_head_r, h=100, $fn=smooth);
+          cylinder(r=m5_screw_r, h=100, $fn=smooth, center = true);
+          translate([0, 0, main_height/2-m5_screw_head_len-m5_screw_head_gap])
+            cylinder(r=m5_screw_head_r, h=100, $fn=smooth);
         }
 
         // Belt Top
