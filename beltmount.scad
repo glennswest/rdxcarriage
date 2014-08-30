@@ -1,9 +1,11 @@
 include <configuration.scad>;
 include <MCAD/boxes.scad>;
 
+smooth = 15;
+
 // Belt parameters
 belt_width = 6;                    // width of the belt, typically 6 (mm)
-belt_thickness = 1.0 - 0.05;       // slightly less than actual belt thickness for compression fit (mm)           
+belt_thickness = 1.0; //- 0.05;       // slightly less than actual belt thickness for compression fit (mm)           
 belt_pitch = 2.0;                  // tooth pitch on the belt, 2 for GT2 (mm)
 tooth_radius = 0.8;                // belt tooth radius, 0.8 for GT2 (mm)
 
@@ -68,7 +70,7 @@ module belt_cutout(clamp_radius, dTheta) {
 
 module fixed_rounded_box(x,y,z)
 {
-    translate([x / 2, y / 2, z / 2]) roundedBox([x,y,z], 5, false);
+    translate([x / 2, y / 2, z / 2]) roundedBox([x,y,z], 5, true);
 }
 module belt_clip(need_hole,clamp_length) {
   difference() {

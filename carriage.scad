@@ -95,7 +95,7 @@ m5_screw_head_gap = 0.5;
 
 bridge_thickness = 0.6;  // To avoid ugly overhangs, use bridges.
 
-do_ball_mount = 0;
+do_ball_mount = 1;
 
 delta = 0.02;  // Small value to avoid visual artifacts for coincident surfaces.
 
@@ -217,7 +217,7 @@ module carriage_body()
             cube([main_cube_width,20, main_height], center = true);
         rotate([0,0,270]) translate([22,0,6]) blank_twin_ball_mount();
         translate([0,-34,6]) 
-           cylinder(r=14,h=main_height, $fn=smooth, center = true);
+           cylinder(r=14,h=main_height+1, $fn=smooth, center = true);
         }
    rotate([0,0,270]) translate([22,0,6]) twin_ball_mount();
   } else {

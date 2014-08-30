@@ -19,7 +19,7 @@ difference(){
     
     translate([0,0,Zball]) sphere(Tball,$fn=50);
     translate([0,0,Mheight]) cylinder(h=100,d=Mdiameter,$fn = 50);
-    translate([0,0,0]) hex_bolt(2,Cheight);
+    translate([0,0,-.1]) hex_bolt(2,Cheight);
     }
 }
 
@@ -44,4 +44,4 @@ module blank_twin_ball_mount(){
       }
 }
 
-//ball_mount();
+ball_mount();
