@@ -79,6 +79,23 @@ module belt_clip(need_hole,clamp_length) {
     translate([0,0,clamp_base]) {
       belt_cutout(clamp_inside_radius, dTheta_inside);
       if (need_hole == 1){
+         translate([(clamp_width / 2), (clamp_length / 2) + 2, 0]) rotate([180,0,0]) screw(clamp_thickness);
+         }
+      translate([(clamp_width - 4), (clamp_length - 7),  -2]) rotate([90,0,0]) screw(clamp_length);
+      translate([(clamp_width - 14), (clamp_length - 7), -2]) rotate([90,0,0]) screw(clamp_length);
+      //translate([clamp_width,clamp_length,0]) rotate([0, 0, 180])
+      //  belt_cutout(clamp_outside_radius, dTheta_outside);
+    }
+  };
+}
+
+module belt_clip_reverse(need_hole,clamp_length) {
+  difference() {
+      fixed_rounded_box(clamp_width, clamp_length, clamp_thickness);
+//    cube([clamp_width,clamp_length,clamp_thickness]);
+    translate([0,0,clamp_base]) {
+      belt_cutout(clamp_outside_radius, dTheta_outside);
+      if (need_hole == 1){
          translate([(clamp_width / 2), (clamp_length / 2) + 2, 0]) screw(clamp_thickness);
          }
       translate([(clamp_width - 4), (clamp_length - 7),  -2]) rotate([90,0,0]) screw(clamp_length);
@@ -89,6 +106,7 @@ module belt_clip(need_hole,clamp_length) {
   };
 }
 
+
 belt_clip(1,clamp_length);
-translate([18, 30, 0]) rotate([0,0,180])  belt_clip(0,clamp_length - 10);
+translate([18, 30, 0]) rotate([0,0,180])  belt_clip_reverse(0,clamp_length - 10);
 
